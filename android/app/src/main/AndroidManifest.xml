@@ -2,6 +2,10 @@
 
     <!-- ✅ INTERNET PERMISSION (REQUIRED FOR API CALLS) -->
     <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
 
     <application
         android:label="clickconnect"
@@ -47,3 +51,5 @@
     </queries>
 
 </manifest>
+
+

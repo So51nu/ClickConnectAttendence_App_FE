@@ -3,6 +3,10 @@ import '../services/auth_service.dart';
 import '../services/token_service.dart';
 import 'login_screen.dart';
 
+// ✅ new screens
+import 'qr_scan_screen.dart';
+import 'attendance_list_screen.dart';
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -13,7 +17,6 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0; // 0 = Home, 1 = Profile
 
-  // Future for user data (only load when needed)
   Future<Map<String, dynamic>?>? _userFuture;
 
   void _loadUserData() {
@@ -51,53 +54,112 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-
       body: IndexedStack(
         index: _selectedIndex,
         children: [
-          // Tab 1: Home / Dashboard - Simple welcome screen (buttons hata diye)
-          Center(
+          // ✅ Tab 1: Home / Dashboard (buttons added)
+          SingleChildScrollView(
+            padding: const EdgeInsets.all(18),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(
-                  Icons.home_rounded,
-                  size: 120,
-                  color: Colors.blueGrey,
-                ),
                 const SizedBox(height: 24),
+                const Icon(Icons.home_rounded, size: 110, color: Colors.blueGrey),
+                const SizedBox(height: 18),
                 Text(
                   "Welcome to Dashboard",
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: Colors.blueGrey.shade800,
                   ),
+                  textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 10),
                 Text(
-                  "Your account is ready",
+                  "Mark your attendance by scanning QR inside office location.",
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     color: Colors.grey.shade700,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 24),
+
+                // ✅ Check-in
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    icon: const Icon(Icons.login),
+                    label: const Text("Check-in (Scan QR)"),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green.shade700,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    ),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const QrScanScreen(action: "CHECKIN")),
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(height: 12),
+
+                // ✅ Check-out
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    icon: const Icon(Icons.logout),
+                    label: const Text("Check-out (Scan QR)"),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red.shade700,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    ),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const QrScanScreen(action: "CHECKOUT")),
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(height: 12),
+
+                // ✅ Attendance history
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    icon: const Icon(Icons.history),
+                    label: const Text("Attendance History"),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    ),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const AttendanceListScreen()),
+                      );
+                    },
                   ),
                 ),
               ],
             ),
           ),
 
-          // Tab 2: Profile Details (loads only when Profile tab is selected)
+          // Tab 2: Profile
           FutureBuilder<Map<String, dynamic>?>(
             future: _userFuture,
             builder: (context, snapshot) {
               if (_userFuture == null) {
-                return const Center(
-                  child: Text("Select Profile tab to view your details"),
-                );
+                return const Center(child: Text("Select Profile tab to view your details"));
               }
-
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
               }
-
               if (snapshot.hasError) {
                 return Center(
                   child: Column(
@@ -116,7 +178,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 );
               }
-
               if (!snapshot.hasData || snapshot.data == null) {
                 return const Center(child: Text("No profile data available"));
               }
@@ -127,7 +188,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   children: [
-                    // Profile Header
                     Card(
                       elevation: 4,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -154,7 +214,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             const SizedBox(height: 20),
                             Text(
                               user['full_name'] ?? 'User',
-                              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -169,19 +229,10 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
                     ),
-
                     const SizedBox(height: 24),
-
-                    // Details
                     _buildDetailTile(Icons.person, "Full Name", user['full_name'] ?? "N/A"),
                     _buildDetailTile(Icons.email, "Email", user['email'] ?? "N/A"),
                     _buildDetailTile(Icons.phone, "Phone", user['phone'] ?? "N/A"),
-                    if (user['created_at'] != null)
-                      _buildDetailTile(
-                        Icons.calendar_today,
-                        "Joined On",
-                        user['created_at'].toString().split('T')[0],
-                      ),
                   ],
                 ),
               );
@@ -189,27 +240,16 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         onTap: (index) {
-          setState(() {
-            _selectedIndex = index;
-          });
-          if (index == 1 && _userFuture == null) {
-            _loadUserData();
-          }
+          setState(() => _selectedIndex = index);
+          if (index == 1 && _userFuture == null) _loadUserData();
         },
         selectedItemColor: Colors.blue.shade700,
         items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home_rounded),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_rounded),
-            label: 'Profile',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.home_rounded), label: 'Home'),
+          BottomNavigationBarItem(icon: Icon(Icons.person_rounded), label: 'Profile'),
         ],
       ),
     );
@@ -222,15 +262,9 @@ class _HomeScreenState extends State<HomeScreen> {
         leading: Icon(icon, color: Colors.blue.shade700, size: 32),
         title: Text(
           title,
-          style: const TextStyle(
-            fontWeight: FontWeight.w600,
-            color: Colors.grey,
-          ),
+          style: const TextStyle(fontWeight: FontWeight.w600, color: Colors.grey),
         ),
-        subtitle: Text(
-          value,
-          style: const TextStyle(fontSize: 16, color: Colors.black87),
-        ),
+        subtitle: Text(value, style: const TextStyle(fontSize: 16, color: Colors.black87)),
       ),
     );
   }

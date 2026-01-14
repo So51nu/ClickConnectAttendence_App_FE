@@ -9,10 +9,14 @@ environment:
 
 dependencies:
   flutter_animate: ^4.5.0
+  mobile_scanner: ^6.0.2
+  geolocator: ^13.0.1
   flutter:
     sdk: flutter
   http: ^1.2.1
-  flutter_secure_storage: ^9.0.0
+  flutter_secure_storage: ^9.2.2
+  qr_flutter: ^4.1.0
+
 
   cupertino_icons: ^1.0.8
 
